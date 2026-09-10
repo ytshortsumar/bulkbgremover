@@ -1,0 +1,39 @@
+# ---------- Local dev tooling (machine-specific, not needed in the repo) ----------
+.claude/
+
+# ---------- Stray personal / test photos (never referenced by the app) ----------
+SAVE_*.jpg
+SAVE_*.jpeg
+SAVE_*.png
+
+# ---------- Dependencies (this project has no build step, but just in case) ----------
+node_modules/
+package-lock.json
+yarn.lock
+
+# ---------- OS junk ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ---------- Editor / IDE ----------
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---------- Logs & temp ----------
+*.log
+npm-debug.log*
+.cache/
+tmp/
+temp/
+
+# ---------- Secrets (defensive — this project has none, but never commit these) ----------
+.env
+.env.*
+*.pem
+*.key
+serviceAccount*.json
+firebase-adminsdk*.json

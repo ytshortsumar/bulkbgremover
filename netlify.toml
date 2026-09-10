@@ -1,0 +1,52 @@
+# netlify.toml — BulkBGRemover (static site, no build step)
+
+[build]
+  publish = "."
+  # No `command` key = Netlify runs no build; it just serves these files.
+
+# SPA-style: always serve index.html at root (single-page app).
+# (No redirects needed — it's a one-page site.)
+
+# --- Caching: let the browser reuse the big model + libs ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Sensible security defaults for a static tool.
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# ============================================================================
+# OPTIONAL SPEED-UP — cross-origin isolation for multi-threaded WASM
+# ============================================================================
+# The app runs fine WITHOUT the two headers below. Devices with WebGPU already
+# get GPU speed; devices without it (many mid-range Androids) fall back to
+# SINGLE-threaded WASM, which is the slow path.
+#
+# Turning on cross-origin isolation unlocks SharedArrayBuffer, which lets
+# Transformers.js run WASM across MULTIPLE threads — a real speed-up on those
+# CPU-only Android phones. The classic way to do that (COEP: require-corp)
+# would BREAK us, because it blocks the AI model download from the Hugging Face
+# CDN (a cross-origin fetch with no CORP header). So we use `credentialless`
+# instead: it still isolates the page (enabling threads) but fetches
+# cross-origin resources WITHOUT cookies rather than blocking them — and the
+# model download needs no cookies, so it keeps working.
+#
+# Browser support: Chromium (Chrome/Edge, incl. Android Chrome) honors
+# `credentialless`. Browsers that don't understand the value (older Safari)
+# simply ignore the COEP header and get today's behavior — so enabling this is
+# low-risk, not all-or-nothing.
+#
+# HOW TO ENABLE (do this AFTER the first deploy is confirmed working):
+#   1. Uncomment the [[headers]] block below and redeploy.
+#   2. Open the site in Android Chrome, DevTools → Console, run:
+#        crossOriginIsolated      // must print `true`
+#   3. Do a real run and confirm the AI model still downloads (Network tab shows
+#      the huggingface.co / cdn-lfs fetch succeed, not fail with a CORP error).
+#   4. If the model fetch fails or `crossOriginIsolated` is false, RE-COMMENT
+#      the block and redeploy — you're back to the known-good state instantly.
+#
+# [[headers]]
+#   for = "/*"
+#   [headers.values]
+#     Cross-Origin-Opener-Policy = "same-origin"
+#     Cross-Origin-Embedder-Policy = "credentialless"

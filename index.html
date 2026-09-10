@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2563eb" />
+
+  <!-- SEO -->
+  <title>BulkBGRemover — Bulk Background Remover for Passport & Job Photos</title>
+  <meta name="description" content="Remove the background from many photos at once. Add a solid blue, white or custom background and crop to passport sizes (Pakistan 35×45mm, US 2×2in). Runs in your browser — no upload." />
+  <meta name="keywords" content="bulk background remover, passport photo background, blue background maker, white background photo, passport size photo, remove background online, batch background remover" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://bulkbgremover.netlify.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="BulkBGRemover" />
+  <meta property="og:title" content="BulkBGRemover — Bulk Background Remover for Passport & Job Photos" />
+  <meta property="og:description" content="Remove backgrounds from many photos at once and set a blue/white/custom background. Passport sizes for Pakistan & USA. Runs in your browser." />
+  <meta property="og:url" content="https://bulkbgremover.netlify.app/" />
+  <meta property="og:image" content="https://bulkbgremover.netlify.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="BulkBGRemover — remove photo backgrounds in bulk and add a passport-ready blue background." />
+  <meta property="og:locale" content="en_PK" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="BulkBGRemover — Bulk Background Remover" />
+  <meta name="twitter:description" content="Remove backgrounds from many photos at once. Blue/white/custom background + passport sizes. Private, in-browser." />
+  <meta name="twitter:image" content="https://bulkbgremover.netlify.app/og-image.png" />
+  <meta name="twitter:image:alt" content="BulkBGRemover — bulk background remover for passport & job photos." />
+
+  <!-- Icons / PWA -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="icon" href="icon-512.png" type="image/png" sizes="512x512" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="BulkBGRemover" />
+
+  <!-- Warm up the CDNs the AI model + libraries load from (pure connection hints;
+       no images are sent). Speeds up the first "Remove backgrounds". -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://huggingface.co" crossorigin />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://huggingface.co" />
+  <link rel="dns-prefetch" href="https://cdn-lfs.huggingface.co" />
+  <link rel="dns-prefetch" href="https://www.gstatic.com" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Structured data: helps Google understand the tool -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "BulkBGRemover",
+    "url": "https://bulkbgremover.netlify.app/",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any (web browser)",
+    "browserRequirements": "Requires a modern browser with JavaScript.",
+    "description": "Bulk background remover. Remove backgrounds from many photos at once, add solid blue/white/custom backgrounds, and crop to passport photo sizes for Pakistan and the USA. Runs entirely in the browser — images are never uploaded.",
+    "featureList": [
+      "Bulk background removal in one click",
+      "Solid background color: 10 presets + custom color picker",
+      "Passport sizes: Pakistan 35x45mm, US 2x2in, and custom",
+      "100% private — no upload, processing happens in your browser",
+      "Download all results as a ZIP"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="BulkBGRemover home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+            <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#bg-grad)"/>
+            <path d="M10 20.5 L14 15 L17 18.5 L21 12.5 L24 20.5 Z" fill="#fff"/>
+            <circle cx="12" cy="11" r="2.2" fill="#fff"/>
+            <defs>
+              <linearGradient id="bg-grad" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <span class="brand-name">Bulk<strong>BG</strong>Remover</span>
+      </a>
+      <nav class="header-nav">
+        <a class="nav-link" href="#about">About</a>
+        <span class="badge-private" title="Your photos never leave your device">🔒 Private</span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero wrap">
+      <h1 class="hero-title">Remove the background from <em>many photos</em> at once</h1>
+      <p class="hero-sub">
+        Upload as many images as you like, remove backgrounds in one click, then add a
+        <strong>blue</strong>, <strong>white</strong> or custom background and crop to
+        <strong>passport sizes</strong>. Perfect for school admissions and job applications.
+        100% private — your photos never leave your device.
+      </p>
+      <p class="hero-note">
+        Editing and previewing are always free. Downloading a <strong>single</strong> photo is free too —
+        downloading <strong>2 or more at once</strong> needs a serial key.
+      </p>
+    </section>
+
+    <!-- App -->
+    <section class="app wrap" id="app">
+
+      <!-- STEP 1: Upload -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="step-num">1</span>
+          <h2>Add your photos</h2>
+        </div>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button"
+             aria-label="Add photos: tap to browse, or drag and drop">
+          <input id="fileInput" type="file" accept="image/*" multiple hidden />
+          <div class="dropzone-inner">
+            <svg class="dz-icon" viewBox="0 0 24 24" width="46" height="46" fill="none"
+                 stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V4M8 8l4-4 4 4"/>
+              <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+            </svg>
+            <p class="dz-title">Tap to add your photos</p>
+            <p class="dz-or">or drag &amp; drop them here — you can pick many at once</p>
+            <p class="dz-hint">JPG · PNG · WEBP · iPhone HEIC → save as JPG first · nothing is uploaded</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Options -->
+      <div class="panel" id="optionsPanel">
+        <div class="panel-head">
+          <span class="step-num">2</span>
+          <h2>Choose background &amp; size</h2>
+        </div>
+
+        <div class="options-grid">
+          <!-- Background color -->
+          <div class="option-block">
+            <h3 class="option-label">Background color</h3>
+            <div class="swatches" id="swatches" role="group" aria-label="Background color presets">
+              <!-- swatches injected by JS -->
+            </div>
+            <div class="custom-color">
+              <label for="customColor" class="custom-color-label">
+                <span class="custom-color-preview" id="customColorPreview"></span>
+                Custom color
+              </label>
+              <input type="color" id="customColor" value="#2563eb" />
+              <input type="text" id="customColorHex" class="hex-input" value="#2563EB"
+                     maxlength="7" spellcheck="false" aria-label="Custom color hex code" />
+            </div>
+          </div>
+
+          <!-- Size / ratio -->
+          <div class="option-block">
+            <h3 class="option-label">Photo size / ratio</h3>
+            <select id="sizePreset" class="size-select" aria-label="Photo size preset">
+              <optgroup label="Passport / ID">
+                <option value="pk-passport">🇵🇰 Pakistan Passport — 35 × 45 mm</option>
+                <option value="pk-nadra">🇵🇰 NADRA / ID — 35 × 45 mm</option>
+                <option value="us-passport">🇺🇸 US Passport / Visa — 2 × 2 in</option>
+                <option value="us-visa">🇺🇸 US Visa (600×600) — 2 × 2 in</option>
+                <option value="schengen">🇪🇺 Schengen Visa — 35 × 45 mm</option>
+              </optgroup>
+              <optgroup label="General">
+                <option value="original" selected>Keep original size</option>
+                <option value="square">Square 1 : 1</option>
+                <option value="ratio-3-4">Portrait 3 : 4</option>
+                <option value="custom">Custom size…</option>
+              </optgroup>
+            </select>
+
+            <div id="customSize" class="custom-size" hidden>
+              <div class="cs-row">
+                <label>W <input type="number" id="customW" min="1" value="600" /></label>
+                <label>H <input type="number" id="customH" min="1" value="600" /></label>
+                <select id="customUnit" aria-label="Custom size unit">
+                  <option value="px">px</option>
+                  <option value="mm">mm</option>
+                  <option value="cm">cm</option>
+                  <option value="in">in</option>
+                </select>
+              </div>
+              <p class="cs-hint">Print sizes render at 300 DPI.</p>
+            </div>
+
+            <label class="fit-toggle">
+              <input type="checkbox" id="autoCrop" checked />
+              <span>Auto-center the subject &amp; crop to fit</span>
+            </label>
+          </div>
+
+          <!-- Output format -->
+          <div class="option-block">
+            <h3 class="option-label">Output format</h3>
+            <div class="format-row">
+              <label class="radio">
+                <input type="radio" name="format" value="image/png" checked />
+                <span>PNG <small>(best quality; transparent if no color)</small></span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="format" value="image/jpeg" />
+                <span>JPG <small>(smaller files)</small></span>
+              </label>
+            </div>
+            <p class="option-note" id="transparentNote">
+              Tip: pick <button type="button" class="link-btn" id="pickTransparent">Transparent</button>
+              background to get cut-outs with no color.
+            </p>
+          </div>
+
+          <!-- Output size -->
+          <div class="option-block">
+            <h3 class="option-label">Output size</h3>
+            <select id="outputQuality" class="size-select" aria-label="Output image size">
+              <option value="hd" selected>HD — full resolution</option>
+              <option value="normal">Normal — smaller file (≤ 1000px)</option>
+            </select>
+            <p class="option-note">
+              HD keeps the full/print resolution. Normal shrinks the longest side to 1000&nbsp;px for smaller files.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Process -->
+      <div class="panel process-panel" id="processPanel" hidden>
+        <div class="panel-head">
+          <span class="step-num">3</span>
+          <h2>Remove backgrounds</h2>
+        </div>
+
+        <div class="process-bar">
+          <button id="processBtn" class="btn btn-primary btn-lg" disabled>
+            <span class="btn-label">Remove backgrounds</span>
+          </button>
+          <button id="downloadAllBtn" class="btn btn-success" hidden>
+            ⬇ Download all (ZIP)
+          </button>
+          <button id="clearBtn" class="btn btn-ghost" hidden>Clear all</button>
+        </div>
+
+        <p class="process-note">
+          The first run downloads the AI model once (about 40–90&nbsp;MB); after that it works
+          instantly — even offline. Everything happens on your device.
+        </p>
+
+        <div id="engineStatus" class="engine-status" hidden aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="engine-status-text">
+            <strong id="engineStatusTitle">Preparing the AI…</strong>
+            <span id="engineStatusDetail">First run downloads the AI model once (about 40–90&nbsp;MB, depending on your device), then it's cached for instant reuse.</span>
+            <div class="progress"><div class="progress-fill" id="engineProgress"></div></div>
+            <button id="engineRetry" class="btn btn-primary btn-sm" type="button" hidden>Retry</button>
+          </div>
+        </div>
+
+        <div id="batchStatus" class="engine-status" hidden aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="engine-status-text">
+            <strong id="batchStatusText">Processing…</strong>
+            <div class="progress"><div class="progress-fill" id="batchProgress"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+
+    <!-- Info / SEO content -->
+    <section class="info wrap">
+      <div class="info-grid">
+        <article>
+          <h2>Why BulkBGRemover?</h2>
+          <ul class="ticks">
+            <li><strong>Bulk in one click</strong> — process dozens of photos together, not one by one.</li>
+            <li><strong>Blue background for admissions</strong> — the exact clean blue many schools & jobs require.</li>
+            <li><strong>Passport sizes built in</strong> — Pakistan 35×45mm, US 2×2in, and custom.</li>
+            <li><strong>Totally private</strong> — the AI runs in your browser; photos are never uploaded.</li>
+            <li><strong>No watermark</strong> — clean, ready-to-use output every time.</li>
+          </ul>
+        </article>
+        <article>
+          <h2>How to make a blue passport photo</h2>
+          <ol class="steps-list">
+            <li>Add one or many photos above.</li>
+            <li>Pick the <strong>blue</strong> swatch (or your exact color).</li>
+            <li>Choose your passport size (e.g. Pakistan 35×45mm).</li>
+            <li>Click <strong>Remove backgrounds</strong>.</li>
+            <li>Download each photo — or all of them as a ZIP.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="about wrap" id="about">
+      <div class="about-card panel">
+        <div class="about-head">
+          <div class="about-avatar"><img src="assets/umar.jpg" alt="Umar Bhatti" /></div>
+          <div>
+            <h2>About this project</h2>
+            <p class="about-role">Built by <strong>Umar Bhatti</strong></p>
+          </div>
+        </div>
+        <p>
+          Hi! I'm <strong>Umar Bhatti</strong>, a <strong>6th-semester Computer Science student</strong>
+          at <strong>COMSATS University Islamabad, Sahiwal Campus</strong>. I built BulkBGRemover to
+          solve a real problem I kept seeing around me: students and job applicants needing clean
+          passport photos with a proper background, but having to edit them one by one, or upload
+          their private photos to a server.
+        </p>
+        <p>
+          This tool does it all <strong>right inside your own browser</strong> — remove backgrounds
+          from many photos at once, set the exact background color, and crop to passport sizes. Your
+          photos are never uploaded, so your data stays private. I built it to genuinely help
+          people.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p><strong>BulkBGRemover</strong> — background remover for passport &amp; job photos.</p>
+      <p class="footer-fine">
+        Runs entirely in your browser. Your images never leave your device.
+        Built for students and job applicants.
+      </p>
+      <p class="footer-fine" id="attribution"></p>
+      <p class="footer-fine">
+        Serial keys are checked with Google Firebase. We store only your key, a device fingerprint,
+        and any name/phone you provide — never your photos, which never leave your device.
+      </p>
+      <p class="footer-fine"><a href="admin.html" class="footer-admin">Admin</a></p>
+    </div>
+  </footer>
+
+  <!-- Serial-key modal -->
+  <div id="keyModal" class="modal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="keyModalTitle">
+    <div class="modal">
+      <button class="modal-close" data-close aria-label="Close">×</button>
+      <h2 id="keyModalTitle" class="modal-title">Enter your serial key</h2>
+      <p class="modal-sub">
+        Downloading <strong>2 or more</strong> photos needs a serial key —
+        a single photo doesn't. <strong>To get a serial key, contact us:</strong>
+        <span class="modal-contact">
+          <a id="supportEmail" href="#">support</a><a id="supportWhatsapp" href="#" hidden> · WhatsApp</a>.
+        </span>
+      </p>
+      <p class="modal-note">
+        Your key locks to the <strong>first device &amp; browser</strong> you use it on. Please don't
+        use private/incognito mode or clear this site's data, or the key can unbind and need a reset.
+      </p>
+      <input id="keyInput" class="key-input" type="text" placeholder="BULK-XXXX-XXXX-XXXX"
+             autocomplete="off" autocapitalize="characters" spellcheck="false" />
+      <p id="keyError" class="form-error" hidden></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-close type="button">Cancel</button>
+        <button id="keyVerifyBtn" class="btn btn-primary" type="button">Unlock downloads</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox (zoom a finished result) -->
+  <div id="lightbox" class="lightbox-overlay" hidden role="dialog" aria-modal="true" aria-label="Photo preview">
+    <button class="lightbox-close" data-close aria-label="Close preview">×</button>
+    <img id="lightboxImg" class="lightbox-img" alt="" />
+  </div>
+
+  <!-- Scripts (ES modules) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

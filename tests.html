@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Tests — BulkBGRemover</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .tests-wrap { max-width: 820px; margin: 40px auto; padding: 0 20px; }
+    .tests-wrap h1 { margin-bottom: 4px; }
+    .test-lead { color: var(--ink-500); font-size: .9rem; margin: 0 0 18px; }
+    .test-summary { margin: 18px 0; font-size: 1.15rem; font-weight: 800; }
+    .test-summary.ok  { color: #15803d; }
+    .test-summary.bad { color: #b91c1c; }
+    .test-item { display: flex; align-items: baseline; gap: 10px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+    .test-item .pill { flex: none; }
+    .test-name { font-weight: 600; }
+    .test-msg { color: #b91c1c; font-size: .82rem; margin-left: auto; font-family: ui-monospace, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <div class="tests-wrap">
+    <h1>BulkBGRemover — unit tests</h1>
+    <p class="test-lead">Pure-function checks for size math, expiry math, and the canvas helpers. This page is not linked from the app — open it directly to run the suite.</p>
+    <div id="summary" class="test-summary">Running…</div>
+    <div id="results"></div>
+  </div>
+
+  <script type="module">
+    import { resolveTargetSize, downscaleToMax, alphaBoundingBox } from './js/image-utils.js';
+    import { computeExpiry, resolveDuration } from './js/duration.js';
+
+    const results = [];
+    const check = (name, cond, msg = '') => results.push({ name, pass: !!cond, msg });
+    const eqObj = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const makeCanvas = (w, h, draw) => {
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      if (draw) draw(c.getContext('2d'));
+      return c;
+    };
+
+    // ---- resolveTargetSize (px math for presets + custom units) ----
+    check('resolveTargetSize: original → null', resolveTargetSize('original', null) === null);
+    check('resolveTargetSize: custom 35×45 mm → 413×531',
+      eqObj(resolveTargetSize('custom', { w: 35, h: 45, unit: 'mm' }), { w: 413, h: 531 }),
+      JSON.stringify(resolveTargetSize('custom', { w: 35, h: 45, unit: 'mm' })));
+    check('resolveTargetSize: us-passport → 600×600',
+      eqObj(resolveTargetSize('us-passport', null), { w: 600, h: 600 }));
+    check('resolveTargetSize: 3.5×4.5 cm == 35×45 mm',
+      eqObj(resolveTargetSize('custom', { w: 3.5, h: 4.5, unit: 'cm' }),
+            resolveTargetSize('custom', { w: 35, h: 45, unit: 'mm' })));
+    check('resolveTargetSize: zero width → null',
+      resolveTargetSize('custom', { w: 0, h: 45, unit: 'mm' }) === null);
+    check('resolveTargetSize: non-numeric → null',
+      resolveTargetSize('custom', { w: 'abc', h: 45, unit: 'mm' }) === null);
+    check('resolveTargetSize: oversized clamps to 8000',
+      eqObj(resolveTargetSize('custom', { w: 100000, h: 100000, unit: 'in' }), { w: 8000, h: 8000 }),
+      JSON.stringify(resolveTargetSize('custom', { w: 100000, h: 100000, unit: 'in' })));
+
+    // ---- computeExpiry (duration → expiry Date) ----
+    check('computeExpiry: lifetime → null', computeExpiry({ label: 'Lifetime' }) === null);
+    {
+      const exp = computeExpiry({ days: 7 });
+      const days = Math.round((exp.getTime() - Date.now()) / 86400000);
+      check('computeExpiry: {days:7} → ~7 days out', days === 7, `got ${days}d`);
+    }
+    {
+      // Injected base date: Jan 31 2024 + 1 month must clamp to Feb 29 (leap year),
+      // NOT roll forward into March.
+      const exp = computeExpiry({ months: 1 }, new Date(2024, 0, 31, 12, 0, 0));
+      check('computeExpiry: Jan 31 + 1 month → Feb 29 2024',
+        exp.getFullYear() === 2024 && exp.getMonth() === 1 && exp.getDate() === 29,
+        exp.toDateString());
+    }
+
+    // ---- resolveDuration (dropdown key → duration object) ----
+    check('resolveDuration: preset 1m', eqObj(resolveDuration('1m', ''), { label: '1 month', months: 1 }));
+    check('resolveDuration: preset 1w', eqObj(resolveDuration('1w', ''), { label: '1 week', days: 7 }));
+    check('resolveDuration: custom 5 → "5 days"', eqObj(resolveDuration('custom', '5'), { label: '5 days', days: 5 }));
+    check('resolveDuration: custom 1 → "1 day"', eqObj(resolveDuration('custom', '1'), { label: '1 day', days: 1 }));
+    check('resolveDuration: custom 0 → null', resolveDuration('custom', '0') === null);
+    check('resolveDuration: custom "abc" → null', resolveDuration('custom', 'abc') === null);
+    check('resolveDuration: unknown key → 1 month', eqObj(resolveDuration('zzz', ''), { label: '1 month', months: 1 }));
+
+    // ---- downscaleToMax (output-size toggle) ----
+    check('downscaleToMax: no-op when already small',
+      downscaleToMax(makeCanvas(500, 400), 1000).width === 500);
+    {
+      const out = downscaleToMax(makeCanvas(2000, 1000), 1000);
+      check('downscaleToMax: 2000×1000 → 1000×500 (aspect kept)',
+        out.width === 1000 && out.height === 500, `${out.width}×${out.height}`);
+    }
+
+    // ---- alphaBoundingBox (auto-crop subject detection) ----
+    {
+      const c = makeCanvas(200, 200, (ctx) => { ctx.fillStyle = '#111827'; ctx.fillRect(50, 60, 40, 30); });
+      const bb = alphaBoundingBox(c);
+      check('alphaBoundingBox: finds a known opaque rectangle',
+        eqObj(bb, { x: 50, y: 60, w: 40, h: 30 }), JSON.stringify(bb));
+    }
+
+    // ---- render ----
+    const wrap = document.getElementById('results');
+    let passCount = 0;
+    for (const r of results) {
+      if (r.pass) passCount++;
+      const row = document.createElement('div');
+      row.className = 'test-item';
+      const pill = document.createElement('span');
+      pill.className = 'pill ' + (r.pass ? 'pill-on' : 'pill-off');
+      pill.textContent = r.pass ? 'PASS' : 'FAIL';
+      const name = document.createElement('span');
+      name.className = 'test-name';
+      name.textContent = r.name;
+      row.append(pill, name);
+      if (!r.pass && r.msg) {
+        const msg = document.createElement('span');
+        msg.className = 'test-msg';
+        msg.textContent = r.msg;
+        row.append(msg);
+      }
+      wrap.appendChild(row);
+    }
+    const sum = document.getElementById('summary');
+    const all = results.length;
+    sum.textContent = `${passCount} / ${all} passed`;
+    sum.className = 'test-summary ' + (passCount === all ? 'ok' : 'bad');
+  </script>
+</body>
+</html>

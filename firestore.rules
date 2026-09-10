@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// BulkBGRemover — Firestore Security Rules.
+// Paste into: Firebase console → Firestore Database → Rules → Publish.
+//
+// Data model:
+//   keys/{keyHash}   keyHash = SHA-256 of the serial key (raw key never stored here):
+//                    { active, expiresAt|null, createdAt, durationLabel, userId,
+//                      boundDevice ("" = unbound), boundAt }
+//   users/{userId}   PII + the raw key for the person a key was issued to — ADMIN-ONLY
+//   admins/{uid}     doc id = an admin's Auth UID (create the first by hand — see SETUP.md)
+//
+// Safe on the free plan with no server:
+//   * keys: `get` is public (verify a key you hold) but `list` is admin-only (no dump).
+//   * key ids are SHA-256 hashes, so a read leak exposes no usable key.
+//   * the only public write is a device claim on an UNBOUND key (boundDevice/boundAt);
+//     it can't overwrite a binding or touch active/expiresAt.
+//   * every other write requires an authenticated admin; users/ is fully admin-only.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // get: public (verify a key by hash). list: admin-only (no dump; also lets the
+    // admin panel load every key in one query). write: admin full; public may ONLY
+    // claim the device lock on an unbound, active key (boundDevice/boundAt, nothing
+    // else) — can't steal a bound key or change active/expiresAt.
+    match /keys/{keyHash} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['boundDevice', 'boundAt'])
+        && resource.data.active == true
+        && resource.data.get('boundDevice', '') == ''
+      );
+    }
+
+    // Key-holder personal info — admin only, never public.
+    match /users/{userId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin allow-list. Seed the first admin doc by hand in the console.
+    match /admins/{uid} {
+      allow get: if isAdmin();
+      allow list: if false;
+      allow write: if false;
+    }
+  }
+}

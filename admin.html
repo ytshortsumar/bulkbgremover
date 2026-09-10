@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — BulkBGRemover</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="BulkBGRemover home">
+        <span class="brand-name">Bulk<strong>BG</strong>Remover</span>
+      </a>
+      <nav class="header-nav">
+        <span class="badge-private">🔒 Admin</span>
+        <a class="nav-link" href="/">← Back to app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-wrap wrap">
+    <h1 class="admin-title">Serial-key admin</h1>
+
+    <!-- Shown only if Firebase config hasn't been pasted yet -->
+    <div id="configWarning" class="panel warn-panel" hidden>
+      <h2>Firebase isn't configured yet</h2>
+      <p>Paste your Firebase web config into <code>js/firebase-config.js</code> and publish the
+      Firestore rules. Full steps are in <code>SETUP.md</code>.</p>
+    </div>
+
+    <!-- Login -->
+    <section id="loginView" class="panel" hidden>
+      <div class="panel-head"><h2>Admin sign in</h2></div>
+      <form id="loginForm" class="admin-form" autocomplete="on">
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="adminEmail" required autocomplete="username" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" id="adminPass" required autocomplete="current-password" />
+        </label>
+        <button type="submit" id="loginBtn" class="btn btn-primary">Sign in</button>
+        <p id="loginError" class="form-error" hidden></p>
+      </form>
+    </section>
+
+    <!-- Tools (after login) -->
+    <section id="toolsView" hidden>
+      <div class="panel">
+        <div class="admin-bar">
+          <span>Signed in as <strong id="whoami"></strong></span>
+          <button id="signOutBtn" class="btn btn-ghost">Sign out</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="step-num">+</span><h2>Generate a serial key</h2></div>
+        <form id="genForm" class="admin-form">
+          <div class="admin-grid">
+            <label class="field">
+              <span>User name</span>
+              <input type="text" id="genName" required placeholder="e.g. Ali Raza" />
+            </label>
+            <label class="field">
+              <span>Phone number</span>
+              <input type="tel" id="genPhone" placeholder="e.g. +92 300 1234567" />
+            </label>
+            <label class="field">
+              <span>Key duration</span>
+              <select id="genDuration">
+                <option value="1w">1 week</option>
+                <option value="1m" selected>1 month</option>
+                <option value="6m">6 months</option>
+                <option value="1y">1 year</option>
+                <option value="custom">Custom (days)…</option>
+                <option value="lifetime">Lifetime (never expires)</option>
+              </select>
+            </label>
+            <label class="field" id="genDaysField" hidden>
+              <span>Number of days</span>
+              <input type="number" id="genDays" min="1" step="1" value="3" placeholder="e.g. 2" />
+            </label>
+          </div>
+          <button type="submit" id="genBtn" class="btn btn-primary">Generate key</button>
+          <p id="genError" class="form-error" hidden></p>
+        </form>
+
+        <div id="keyResult" class="key-result" hidden>
+          <p class="key-result-warn">Here's the new serial key. You can copy it now — it also stays listed in “Issued keys” below.</p>
+          <div class="key-line">
+            <code id="outKey" class="key-code"></code>
+            <button id="copyKeyBtn" class="btn btn-success" type="button">Copy</button>
+          </div>
+          <p class="key-meta">User ID: <strong id="outUserId"></strong> · Expires: <strong id="outExpiry"></strong></p>
+          <div class="key-send">
+            <a id="sendWhatsapp" class="btn btn-success btn-sm" target="_blank" rel="noopener" href="#">Send on WhatsApp</a>
+            <a id="sendEmail" class="btn btn-ghost btn-sm" href="#">Send by email</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="admin-bar">
+          <div class="panel-head" style="margin:0"><h2>Issued keys</h2></div>
+          <div class="keys-toolbar">
+            <input type="search" id="keySearch" class="keys-search" placeholder="Search name, phone, key…" aria-label="Search issued keys" />
+            <select id="keyFilter" class="keys-filter" aria-label="Filter issued keys">
+              <option value="all">All keys</option>
+              <option value="soon7">Expiring ≤ 7 days</option>
+              <option value="soon30">Expiring ≤ 30 days</option>
+              <option value="expired">Expired</option>
+              <option value="active">Active</option>
+              <option value="disabled">Disabled</option>
+            </select>
+            <button id="refreshBtn" class="btn btn-ghost">Refresh</button>
+          </div>
+        </div>
+        <p id="keysSummary" class="keys-summary"></p>
+        <div class="table-scroll">
+          <table class="keys-table">
+            <thead>
+              <tr><th>Name</th><th>Phone</th><th>User ID</th><th>Key</th><th>Duration</th><th>Expires</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="keysBody">
+              <tr><td colspan="8" class="muted">No keys yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

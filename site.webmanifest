@@ -1,0 +1,17 @@
+{
+  "name": "BulkBGRemover — Bulk Background Remover",
+  "short_name": "BulkBGRemover",
+  "description": "Remove backgrounds from many photos at once, add blue/white/custom backgrounds, and crop to passport sizes. Private, runs in your browser.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "categories": ["photo", "productivity", "utilities"],
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
