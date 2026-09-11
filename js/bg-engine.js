@@ -40,10 +40,26 @@ async function getTransformers() {
   return _tf;
 }
 
+/* Phones/tablets: skip WebGPU entirely. Many mobile GPUs advertise WebGPU +
+   shader-f16 and pass the tiny warm-up, then FAIL on a real 1024² image
+   (driver / GPU-memory limits). That stranded batches mid-run behind an
+   expensive one-off CPU re-download — the reported "first image works, the
+   rest fail" bug. WASM is slower on mobile but reliable, and it downloads the
+   model only once (no surprise mid-batch reload). */
+function isMobileLike() {
+  try {
+    const coarseTouch = matchMedia('(pointer: coarse)').matches
+      && (navigator.maxTouchPoints || 0) > 0;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile|Silk/i.test(navigator.userAgent || '');
+    return coarseTouch || mobileUA;
+  } catch (_) { return false; }
+}
+
 /* Detect WebGPU. We pick it only when the adapter exposes `shader-f16`, because
    the fp16 model's kernels need f16 shaders; adapters without it fall back to
-   WASM (warmUp is the final guard). */
+   WASM (warmUp is the final guard). Mobile always uses WASM (see above). */
 async function pickDevice() {
+  if (isMobileLike()) return 'wasm';
   try {
     if ('gpu' in navigator && navigator.gpu) {
       const adapter = await navigator.gpu.requestAdapter();

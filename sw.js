@@ -7,7 +7,7 @@
 
 // Bump on every deploy that changes the shell files → old caches are dropped
 // and users pick up the new HTML/CSS/JS.
-const CACHE_VERSION = 'bulkbg-shell-v1';
+const CACHE_VERSION = 'bulkbg-shell-v2';
 
 // Core files to have ready before the first offline load; everything else is
 // cached lazily on first request.
